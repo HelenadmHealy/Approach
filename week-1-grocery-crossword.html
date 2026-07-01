@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Grocery Store Crossword — ESL Level 2</title>
+<style>
+  :root{
+    --cream:#FBF6EC;
+    --paper:#FFFFFF;
+    --ink:#2B2A25;
+    --green:#2E5E45;
+    --green-light:#E4EEE2;
+    --tomato:#D6512D;
+    --lemon:#E8A93B;
+    --line:#D8CDB8;
+    --grid-line:#BFC9B4;
+    --correct:#3E7B4F;
+    --incorrect:#C4483C;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Trebuchet MS','Segoe UI',Verdana,sans-serif;
+    display:flex;
+    justify-content:center;
+    padding:28px 16px 60px;
+  }
+  .wrap{
+    width:100%;
+    max-width:1080px;
+  }
+  header{
+    text-align:center;
+    margin-bottom:22px;
+  }
+  .tag{
+    display:inline-block;
+    background:var(--green);
+    color:var(--cream);
+    font-size:12px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    padding:5px 14px;
+    border-radius:3px;
+    margin-bottom:10px;
+    font-weight:700;
+  }
+  h1{
+    font-family:'Georgia',serif;
+    font-size:clamp(28px,4vw,42px);
+    margin:0 0 6px;
+    color:var(--green);
+    letter-spacing:.01em;
+  }
+  h1 .accent{ color:var(--tomato); }
+  .sub{
+    color:#6b6558;
+    font-size:15px;
+    max-width:520px;
+    margin:0 auto;
+    line-height:1.5;
+  }
+
+  .board{
+    display:flex;
+    gap:26px;
+    align-items:flex-start;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+
+  .grid-panel{
+    background:var(--paper);
+    border-radius:10px;
+    padding:18px;
+    box-shadow:0 2px 0 var(--line), 0 8px 24px -12px rgba(0,0,0,0.25);
+    flex:0 0 auto;
+  }
+
+  #gridholder{
+    display:grid;
+    background:var(--ink);
+    gap:1px;
+    border:2px solid var(--ink);
+    border-radius:4px;
+    overflow:hidden;
+  }
+  .cell{
+    position:relative;
+    background:var(--paper);
+    width:34px;
+    height:34px;
+  }
+  .cell.block{ background:var(--cream); }
+  .cell input{
+    width:100%;
+    height:100%;
+    border:none;
+    background:transparent;
+    text-align:center;
+    text-transform:uppercase;
+    font-size:17px;
+    font-weight:700;
+    font-family:inherit;
+    color:var(--ink);
+    padding:0;
+    caret-color:var(--tomato);
+  }
+  .cell input:focus{
+    outline:none;
+    background:#FFF3E0;
+  }
+  .cell.active-word input:not(:focus){
+    background:var(--green-light);
+  }
+  .cell .num{
+    position:absolute;
+    top:1px;
+    left:2px;
+    font-size:9px;
+    font-weight:700;
+    color:var(--tomato);
+    line-height:1;
+    pointer-events:none;
+  }
+  .cell.correct input{ color:var(--correct); background:#EAF5EC; }
+  .cell.incorrect input{ color:var(--incorrect); background:#FBEAE7; }
+
+  .side{
+    flex:1 1 320px;
+    min-width:280px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+
+  .status-bar{
+    background:var(--paper);
+    border-radius:10px;
+    padding:14px 18px;
+    box-shadow:0 2px 0 var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .progress-label{
+    font-size:14px;
+    font-weight:700;
+    color:var(--green);
+  }
+  #progressCount{ color:var(--tomato); }
+  .buttons{ display:flex; gap:8px; flex-wrap:wrap; }
+  button{
+    font-family:inherit;
+    font-size:13px;
+    font-weight:700;
+    border:none;
+    border-radius:6px;
+    padding:9px 14px;
+    cursor:pointer;
+    transition:transform .08s ease, filter .15s ease;
+  }
+  button:active{ transform:translateY(1px); }
+  .btn-check{ background:var(--green); color:#fff; }
+  .btn-check:hover{ filter:brightness(1.08); }
+  .btn-hint{ background:var(--lemon); color:var(--ink); }
+  .btn-hint:hover{ filter:brightness(1.05); }
+  .btn-reset{ background:transparent; color:#8a8375; border:1px solid var(--line); }
+  .btn-reset:hover{ background:var(--green-light); }
+
+  .clue-panel{
+    background:var(--paper);
+    border-radius:10px;
+    padding:16px 18px;
+    box-shadow:0 2px 0 var(--line);
+  }
+  .clue-panel h2{
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:.1em;
+    color:var(--green);
+    margin:0 0 10px;
+    border-bottom:2px solid var(--green-light);
+    padding-bottom:6px;
+  }
+  .clue-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px;}
+  .clue-item{
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+    cursor:pointer;
+    padding:6px 8px;
+    border-radius:6px;
+    transition:background .12s ease;
+  }
+  .clue-item:hover{ background:var(--green-light); }
+  .clue-item.selected{ background:#FDECD8; }
+  .clue-item.done .clue-text{ color:#9C9686; text-decoration:line-through; }
+  .price-tag{
+    flex:0 0 auto;
+    min-width:22px;
+    height:20px;
+    background:var(--lemon);
+    color:var(--ink);
+    font-size:11px;
+    font-weight:800;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:3px 8px 8px 3px;
+    position:relative;
+    padding:0 6px;
+  }
+  .price-tag::before{
+    content:'';
+    position:absolute;
+    left:-3px;
+    top:50%;
+    transform:translateY(-50%);
+    width:6px;
+    height:6px;
+    background:var(--paper);
+    border-radius:50%;
+    border:1px solid var(--lemon);
+  }
+  .clue-text{ font-size:14px; line-height:1.4; padding-top:1px; }
+
+  .done-banner{
+    display:none;
+    text-align:center;
+    background:var(--green);
+    color:#fff;
+    padding:16px;
+    border-radius:10px;
+    font-size:16px;
+    font-weight:700;
+    margin-top:18px;
+  }
+  .done-banner.show{ display:block; }
+
+  @media (max-width:520px){
+    .cell{ width:24px; height:24px; }
+    .cell input{ font-size:13px; }
+    .cell .num{ font-size:7px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="tag">ESL Level 2 · Vocabulary Practice</span>
+    <h1>Grocery Store <span class="accent">Crossword</span></h1>
+    <p class="sub">Read each clue and type the grocery word into the grid. Click a clue to jump to it. Use "Check answers" any time — correct letters turn green.</p>
+  </header>
+
+  <div class="board">
+    <div class="grid-panel">
+      <div id="gridholder"></div>
+    </div>
+
+    <div class="side">
+      <div class="status-bar">
+        <div class="progress-label">Words solved: <span id="progressCount">0</span> / 15</div>
+        <div class="buttons">
+          <button class="btn-hint" id="hintBtn">Hint</button>
+          <button class="btn-check" id="checkBtn">Check answers</button>
+          <button class="btn-reset" id="resetBtn">Reset</button>
+        </div>
+      </div>
+
+      <div class="clue-panel">
+        <h2>Across</h2>
+        <ul class="clue-list" id="acrossList"></ul>
+      </div>
+      <div class="clue-panel">
+        <h2>Down</h2>
+        <ul class="clue-list" id="downList"></ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="done-banner" id="doneBanner">🛒 Great job! You filled every word in the basket correctly!</div>
+</div>
+
+<script>
+const DATA = {
+  "height": 13, "width": 16,
+  "words": [
+    {"word":"BANANA","row":8,"col":7,"dir":"H","clue":"A long yellow fruit.","number":9},
+    {"word":"BREAD","row":8,"col":7,"dir":"V","clue":"You slice this and make sandwiches with it.","number":9},
+    {"word":"WATER","row":11,"col":6,"dir":"H","clue":"You drink this every day; it has no color.","number":12},
+    {"word":"APPLE","row":8,"col":12,"dir":"V","clue":"A round fruit that can be red or green.","number":10},
+    {"word":"SUGAR","row":9,"col":3,"dir":"H","clue":"A sweet white ingredient used in baking.","number":11},
+    {"word":"EGGS","row":12,"col":12,"dir":"H","clue":"Chickens lay these; you can fry or boil them.","number":13},
+    {"word":"CHEESE","row":5,"col":3,"dir":"V","clue":"A yellow or white food made from milk.","number":5},
+    {"word":"CARROT","row":5,"col":3,"dir":"H","clue":"An orange vegetable, good for your eyes.","number":5},
+    {"word":"BUTTER","row":0,"col":5,"dir":"V","clue":"A yellow food you spread on bread.","number":1},
+    {"word":"FISH","row":6,"col":0,"dir":"H","clue":"An animal that swims; you can eat it too.","number":6},
+    {"word":"RICE","row":8,"col":0,"dir":"H","clue":"Small white grains, common in Asian food.","number":8},
+    {"word":"JUICE","row":1,"col":4,"dir":"H","clue":"A sweet drink made from fruit.","number":2},
+    {"word":"MEAT","row":3,"col":2,"dir":"H","clue":"Food from an animal, like beef or pork.","number":3},
+    {"word":"ONION","row":4,"col":11,"dir":"V","clue":"This vegetable can make you cry when you cut it.","number":4},
+    {"word":"MILK","row":6,"col":10,"dir":"H","clue":"A white drink that comes from a cow.","number":7}
+  ]
+};
+
+const H = DATA.height, W = DATA.width;
+// solution grid
+const solution = Array.from({length:H}, () => Array(W).fill(null));
+const cellWords = Array.from({length:H}, () => Array(W).fill(null)); // list of {word,dir} per cell
+DATA.words.forEach(w => {
+  for (let i=0;i<w.word.length;i++){
+    const r = w.row + (w.dir==='V'?i:0);
+    const c = w.col + (w.dir==='H'?i:0);
+    solution[r][c] = w.word[i];
+    if(!cellWords[r][c]) cellWords[r][c] = [];
+    cellWords[r][c].push({key:w.word+'-'+w.dir+'-'+w.row+'-'+w.col, dir:w.dir});
+  }
+});
+const numberAt = {};
+DATA.words.forEach(w => { numberAt[w.row+'_'+w.col] = w.number; });
+
+const gridholder = document.getElementById('gridholder');
+gridholder.style.gridTemplateColumns = `repeat(${W}, 34px)`;
+gridholder.style.gridTemplateRows = `repeat(${H}, 34px)`;
+
+const inputs = Array.from({length:H}, () => Array(W).fill(null));
+
+for(let r=0;r<H;r++){
+  for(let c=0;c<W;c++){
+    const cellDiv = document.createElement('div');
+    if(solution[r][c]){
+      cellDiv.className = 'cell';
+      const num = numberAt[r+'_'+c];
+      if(num){
+        const numSpan = document.createElement('span');
+        numSpan.className = 'num';
+        numSpan.textContent = num;
+        cellDiv.appendChild(numSpan);
+      }
+      const inp = document.createElement('input');
+      inp.maxLength = 1;
+      inp.dataset.r = r; inp.dataset.c = c;
+      cellDiv.appendChild(inp);
+      inputs[r][c] = inp;
+    } else {
+      cellDiv.className = 'cell block';
+    }
+    gridholder.appendChild(cellDiv);
+  }
+}
+
+// direction state for navigation: default across if word exists across, else down
+let currentDir = 'H';
+
+function wordAt(r,c,dir){
+  const list = cellWords[r][c];
+  if(!list) return null;
+  return list.find(w => w.dir===dir) || list[0];
+}
+
+function getWordCells(word){
+  // word: DATA.words entry
+  const cells = [];
+  for(let i=0;i<word.word.length;i++){
+    const r = word.row + (word.dir==='V'?i:0);
+    const c = word.col + (word.dir==='H'?i:0);
+    cells.push([r,c]);
+  }
+  return cells;
+}
+
+function findWordByKey(key){
+  return DATA.words.find(w => (w.word+'-'+w.dir+'-'+w.row+'-'+w.col) === key);
+}
+
+function clearHighlight(){
+  document.querySelectorAll('.cell.active-word').forEach(el => el.classList.remove('active-word'));
+  document.querySelectorAll('.clue-item.selected').forEach(el => el.classList.remove('selected'));
+}
+
+function highlightWord(word){
+  clearHighlight();
+  getWordCells(word).forEach(([r,c]) => {
+    inputs[r][c].closest('.cell').classList.add('active-word');
+  });
+  const key = word.word+'-'+word.dir+'-'+word.row+'-'+word.col;
+  const li = document.querySelector(`.clue-item[data-key="${key}"]`);
+  if(li) li.classList.add('selected');
+}
+
+function moveFocus(r,c,dir,delta){
+  const nr = r + (dir==='V'?delta:0);
+  const nc = c + (dir==='H'?delta:0);
+  if(nr<0||nr>=H||nc<0||nc>=W) return false;
+  if(!inputs[nr][nc]) return false;
+  inputs[nr][nc].focus();
+  return true;
+}
+
+for(let r=0;r<H;r++){
+  for(let c=0;c<W;c++){
+    const inp = inputs[r][c];
+    if(!inp) continue;
+    inp.addEventListener('focus', () => {
+      const list = cellWords[r][c];
+      let chosen = list.find(w=>w.dir===currentDir) || list[0];
+      currentDir = chosen.dir;
+      const w = findWordByKey(chosen.key);
+      highlightWord(w);
+      updateStatusForFocus();
+    });
+    inp.addEventListener('input', (e) => {
+      const val = e.target.value.toUpperCase().replace(/[^A-Z]/g,'');
+      e.target.value = val;
+      if(val){
+        const moved = moveFocus(r,c,currentDir,1);
+        if(!moved){
+          // try switching direction if word ends here
+        }
+      }
+      clearCellState(r,c);
+    });
+    inp.addEventListener('keydown', (e) => {
+      if(e.key === 'Backspace' && !e.target.value){
+        moveFocus(r,c,currentDir,-1);
+      } else if(e.key === 'ArrowRight'){ currentDir='H'; moveFocus(r,c,'H',1); e.preventDefault(); }
+      else if(e.key === 'ArrowLeft'){ currentDir='H'; moveFocus(r,c,'H',-1); e.preventDefault(); }
+      else if(e.key === 'ArrowDown'){ currentDir='V'; moveFocus(r,c,'V',1); e.preventDefault(); }
+      else if(e.key === 'ArrowUp'){ currentDir='V'; moveFocus(r,c,'V',-1); e.preventDefault(); }
+      else if(e.key === ' '){
+        // toggle direction on same cell
+        const list = cellWords[r][c];
+        if(list.length>1){
+          currentDir = currentDir==='H' ? 'V' : 'H';
+          const chosen = list.find(w=>w.dir===currentDir) || list[0];
+          highlightWord(findWordByKey(chosen.key));
+        }
+        e.preventDefault();
+      }
+    });
+    inp.addEventListener('dblclick', () => {
+      const list = cellWords[r][c];
+      if(list.length>1){
+        currentDir = currentDir==='H' ? 'V' : 'H';
+        const chosen = list.find(w=>w.dir===currentDir) || list[0];
+        highlightWord(findWordByKey(chosen.key));
+      }
+    });
+  }
+}
+
+function clearCellState(r,c){
+  const cellEl = inputs[r][c].closest('.cell');
+  cellEl.classList.remove('correct','incorrect');
+}
+
+// Build clue lists
+const acrossList = document.getElementById('acrossList');
+const downList = document.getElementById('downList');
+const sortedWords = [...DATA.words].sort((a,b) => a.number-b.number);
+
+sortedWords.forEach(w => {
+  const li = document.createElement('li');
+  li.className = 'clue-item';
+  li.dataset.key = w.word+'-'+w.dir+'-'+w.row+'-'+w.col;
+  const tag = document.createElement('span');
+  tag.className = 'price-tag';
+  tag.textContent = w.number;
+  const text = document.createElement('span');
+  text.className = 'clue-text';
+  text.textContent = w.clue;
+  li.appendChild(tag);
+  li.appendChild(text);
+  li.addEventListener('click', () => {
+    currentDir = w.dir;
+    highlightWord(w);
+    inputs[w.row][w.col].focus();
+  });
+  (w.dir==='H' ? acrossList : downList).appendChild(li);
+});
+
+function updateStatusForFocus(){ /* reserved for future use */ }
+
+function isWordComplete(w){
+  return getWordCells(w).every(([r,c]) => inputs[r][c].value === solution[r][c]);
+}
+
+function updateProgress(){
+  let solved = 0;
+  DATA.words.forEach(w => {
+    const li = document.querySelector(`.clue-item[data-key="${w.word+'-'+w.dir+'-'+w.row+'-'+w.col}"]`);
+    if(isWordComplete(w)){
+      solved++;
+      li.classList.add('done');
+    } else {
+      li.classList.remove('done');
+    }
+  });
+  document.getElementById('progressCount').textContent = solved;
+  const banner = document.getElementById('doneBanner');
+  if(solved === DATA.words.length){
+    banner.classList.add('show');
+  } else {
+    banner.classList.remove('show');
+  }
+  return solved;
+}
+
+document.getElementById('checkBtn').addEventListener('click', () => {
+  for(let r=0;r<H;r++){
+    for(let c=0;c<W;c++){
+      if(!solution[r][c]) continue;
+      const inp = inputs[r][c];
+      const cellEl = inp.closest('.cell');
+      cellEl.classList.remove('correct','incorrect');
+      if(!inp.value) continue;
+      if(inp.value === solution[r][c]){
+        cellEl.classList.add('correct');
+      } else {
+        cellEl.classList.add('incorrect');
+      }
+    }
+  }
+  updateProgress();
+});
+
+document.getElementById('hintBtn').addEventListener('click', () => {
+  // reveal the first empty letter of the currently highlighted word, else first word
+  const activeCellEl = document.querySelector('.cell.active-word');
+  let targetWord = DATA.words[0];
+  if(activeCellEl){
+    const inp = activeCellEl.querySelector('input');
+    const r = +inp.dataset.r, c = +inp.dataset.c;
+    const list = cellWords[r][c];
+    const chosen = list.find(w=>w.dir===currentDir) || list[0];
+    targetWord = findWordByKey(chosen.key);
+  }
+  const cells = getWordCells(targetWord);
+  for(const [r,c] of cells){
+    if(!inputs[r][c].value){
+      inputs[r][c].value = solution[r][c];
+      inputs[r][c].closest('.cell').classList.add('correct');
+      inputs[r][c].closest('.cell').classList.remove('incorrect');
+      break;
+    }
+  }
+  updateProgress();
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  for(let r=0;r<H;r++){
+    for(let c=0;c<W;c++){
+      if(!inputs[r][c]) continue;
+      inputs[r][c].value = '';
+      inputs[r][c].closest('.cell').classList.remove('correct','incorrect','active-word');
+    }
+  }
+  clearHighlight();
+  updateProgress();
+});
+
+// live progress update on any input
+gridholder.addEventListener('input', updateProgress);
+
+updateProgress();
+</script>
+</body>
+</html>
